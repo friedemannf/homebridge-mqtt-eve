@@ -152,7 +152,6 @@ module.exports = function (api) {
 
     CustomServices.PowerMeter = class extends Service {
         constructor(displayName, subType) {
-            console.log("HAHAHA1")
             super(displayName, "2d528896-bbbd-44b0-bfe7-d31142a6828b", subType);
             Service.call(this, displayName, '2d528896-bbbd-44b0-bfe7-d31142a6828b', subType);
             this.addCharacteristic(CustomCharacteristic.Consumption);
@@ -162,12 +161,10 @@ module.exports = function (api) {
         }
     }
 
-    CustomServices.Climate = class extends Service {
+    CustomServices.AirPressure = class extends Service {
         constructor(displayName, subType) {
             super(displayName, "c0af0878-343f-4d26-9637-32410b2bf3de", subType);
             Service.call(this, displayName, 'c0af0878-343f-4d26-9637-32410b2bf3de', subType);
-            this.addCharacteristic(Characteristic.CurrentTemperature);
-            this.addCharacteristic(Characteristic.CurrentRelativeHumidity);
             this.addCharacteristic(CustomCharacteristic.AirPressure);
         }
     }

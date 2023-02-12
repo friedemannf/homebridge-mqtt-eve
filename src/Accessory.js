@@ -65,7 +65,7 @@ exports = module.exports = function (api, characteristics, services) {
           if (config["history"]["activate"] === true) {
             const historyService = this._createHistoryService(
               "energy",
-              config["history"["storage"]],
+              config["history"]["storage"],
               config["history"]["filename"],
               config["history"]["filepath"],
             );
@@ -81,30 +81,32 @@ exports = module.exports = function (api, characteristics, services) {
             humidity: 0,
             airPressure: 600,
           };
-          const climateService = new services.Climate(this.name);
-          this.services.push(climateService);
-          // TODO: Make configurable
-          climateService.getCharacteristic(api.hap.Characteristic.TemperatureDisplayUnits).setValue(api.hap.Characteristic.TemperatureDisplayUnits.CELSIUS); // Celsius
-          climateService.getCharacteristic(api.hap.Characteristic.CurrentTemperature).onGet(() => this.values.temperature);
-          climateService.getCharacteristic(api.hap.Characteristic.CurrentRelativeHumidity).onGet(() => this.values.humidity);
-          climateService.getCharacteristic(characteristics.AirPressure).onGet(() => this.values.airPressure);
+          const temperatureService = new api.hap.Service.TemperatureSensor(this.name);
+          this.services.push(temperatureService);
+          const humidityService = new api.hap.Service.HumiditySensor(this.name);
+          this.services.push(humidityService);
+          const airPressureService = new services.AirPressure(this.name);
+          this.services.push(airPressureService);
+          temperatureService.getCharacteristic(api.hap.Characteristic.CurrentTemperature).onGet(() => this.values.temperature);
+          humidityService.getCharacteristic(api.hap.Characteristic.CurrentRelativeHumidity).onGet(() => this.values.humidity);
+          airPressureService.getCharacteristic(characteristics.AirPressure).onGet(() => this.values.airPressure);
           this.mqtt.on(mqtt.KeyTemperature, (temperature) => {
             this.values.temperature = temperature;
-            climateService.setCharacteristic(api.hap.Characteristic.CurrentTemperature, temperature);
+            temperatureService.setCharacteristic(api.hap.Characteristic.CurrentTemperature, temperature);
           });
           this.mqtt.on(mqtt.KeyHumidity, (humidity) => {
             this.values.humidity = humidity;
-            climateService.setCharacteristic(api.hap.Characteristic.CurrentRelativeHumidity, humidity);
+            humidityService.setCharacteristic(api.hap.Characteristic.CurrentRelativeHumidity, humidity);
           });
           this.mqtt.on(mqtt.KeyAirPressure, (airPressure) => {
             this.values.airPressure = airPressure;
-            climateService.setCharacteristic(characteristics.AirPressure, airPressure);
+            airPressureService.setCharacteristic(characteristics.AirPressure, airPressure);
           });
 
           if (config["history"]["activate"] === true) {
             const historyService = this._createHistoryService(
               "weather",
-              config["history"["storage"]],
+              config["history"]["storage"],
               config["history"]["filename"],
               config["history"]["filepath"],
             );
