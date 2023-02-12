@@ -1,0 +1,35 @@
+{
+  "private": true,
+  "displayName": "[local] MQTT Eve",
+  "name": "homebridge-mqtt-eve",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "keywords": [
+    "homebridge-plugin"
+  ],
+  "engines": {
+    "node": ">=14.18.1",
+    "homebridge": ">=1.3.5"
+  },
+  "dependencies": {
+    "fakegato-history": "^0.6.3",
+    "mqtt": "^4.3.7"
+  },
+  "devDependencies": {
+    "homebridge": "^1.5.0"
+  },
+  "description": "A Homebridge plugin that connects to an MQTT server and creates Homebridge accessories for them while emulating an Eve history.",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/friedemannf/homebridge-mqtt-eve.git"
+  },
+  "author": "Friedemann Fürst",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/friedemannf/homebridge-mqtt-eve/issues"
+  },
+  "homepage": "https://github.com/friedemannf/homebridge-mqtt-eve#readme"
+}

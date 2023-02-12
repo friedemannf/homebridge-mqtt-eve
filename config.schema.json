@@ -1,0 +1,211 @@
+{
+  "pluginAlias": "mqtt-eve-accessory",
+  "pluginType": "accessory",
+  "singular": false,
+  "schema": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "title": "Name",
+        "type": "string",
+        "description": "Display name to use in the Home App",
+        "required": true
+      },
+      "type": {
+        "title": "Accessory Type",
+        "type": "string",
+        "description": "The type of accessory to add.",
+        "required": true,
+        "oneOf": [
+          {
+            "title": "Energy Meter",
+            "enum": [
+              "energy"
+            ]
+          },
+          {
+            "title": "Contact Sensor",
+            "enum": [
+              "contact"
+            ]
+          },
+          {
+            "title": "Climate Sensor",
+            "enum": [
+              "climate"
+            ]
+          }
+        ]
+      },
+      "mqtt": {
+        "title": "MQTT",
+        "type": "object",
+        "required": true,
+        "properties": {
+          "url": {
+            "title": "URL",
+            "type": "string",
+            "required": true,
+            "format": "uri"
+          },
+          "username": {
+            "title": "Username",
+            "type": "string"
+          },
+          "password": {
+            "title": "Password",
+            "type": "string"
+          },
+          "topic": {
+            "title": "Topic",
+            "type": "string",
+            "required": true
+          }
+        }
+      },
+      "info": {
+        "title": "Info",
+        "type": "object",
+        "properties": {
+          "manufacturer": {
+            "title": "Manufacturer",
+            "type": "string"
+          },
+          "model": {
+            "title": "Model",
+            "type": "string"
+          },
+          "serialNumber": {
+            "title": "Serial Number",
+            "type": "string",
+            "description": "Should be unique across all Eve devices, otherwise their history will be merged."
+          }
+        }
+      },
+      "history": {
+        "type": "object",
+        "title": "History",
+        "properties": {
+          "activate": {
+            "title": "Activate History",
+            "description": "If activated, will use fakegato-history to imitate an Eve accessory.",
+            "type": "boolean",
+            "default": false
+          },
+          "storage": {
+            "title": "Storage",
+            "type": "string",
+            "description": "The storage driver to use.",
+            "required": true,
+            "default": "fs",
+            "oneOf": [
+              {
+                "title": "FileSystem",
+                "enum": [
+                  "fs"
+                ]
+              },
+              {
+                "title": "Google Drive",
+                "enum": [
+                  "googleDrive"
+                ]
+              }
+            ],
+            "condition": {
+              "functionBody": "return (model.history.activate === true)"
+            }
+          },
+          "filename": {
+            "title": "File Name",
+            "type": "string",
+            "description": "The JSON-file name to use. If no suffix is specified, .json will be added automatically",
+            "condition": {
+              "functionBody": "return (model.history.activate === true && model.history.storage === 'fs')"
+            }
+          },
+          "filepath": {
+            "title": "File Path",
+            "type": "string",
+            "description": "The folder to store persistent files in. If not specified, the -U homebridge option will be used."
+          }
+        }
+      },
+      "keys": {
+        "type": "object",
+        "title": "Keys",
+        "properties": {
+          "override": {
+            "type": "boolean",
+            "default": false,
+            "description": "Activate to override the default MQTT message keys"
+          },
+          "consumption": {
+            "type": "string",
+            "default": "power",
+            "required": true,
+            "condition": {
+              "functionBody": "return (model.keys.override === true && model.type === 'energy')"
+            }
+          },
+          "totalConsumption": {
+            "type": "string",
+            "default": "energy",
+            "required": true,
+            "condition": {
+              "functionBody": "return (model.keys.override === true && model.type === 'energy')"
+            }
+          },
+          "voltage": {
+            "type": "string",
+            "default": "voltage",
+            "required": true,
+            "condition": {
+              "functionBody": "return (model.keys.override === true && model.type === 'energy')"
+            }
+          },
+          "ampere": {
+            "type": "string",
+            "default": "ampere",
+            "required": true,
+            "condition": {
+              "functionBody": "return (model.keys.override === true && model.type === 'energy')"
+            }
+          },
+          "temperature": {
+            "type": "string",
+            "default": "temperature",
+            "required": true,
+            "condition": {
+              "functionBody": "return (model.keys.override === true && model.type === 'climate')"
+            }
+          },
+          "humidity": {
+            "type": "string",
+            "default": "humidity",
+            "required": true,
+            "condition": {
+              "functionBody": "return (model.keys.override === true && model.type === 'climate')"
+            }
+          },
+          "pressure": {
+            "type": "string",
+            "default": "pressure",
+            "required": true,
+            "condition": {
+              "functionBody": "return (model.keys.override === true && model.type === 'climate')"
+            }
+          },
+          "contact": {
+            "type": "string",
+            "default": "contact",
+            "required": true,
+            "condition": {
+              "functionBody": "return (model.keys.override === true && model.type === 'contact')"
+            }
+          }
+        }
+      }
+    }
+  }
+}
