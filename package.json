@@ -1,6 +1,5 @@
 {
-  "private": true,
-  "displayName": "[local] MQTT Eve",
+  "displayName": "MQTT Eve",
   "name": "homebridge-mqtt-eve",
   "version": "1.0.0",
   "main": "src/index.js",
