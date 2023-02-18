@@ -1,7 +1,7 @@
 {
   "displayName": "MQTT Eve",
   "name": "homebridge-mqtt-eve",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "main": "src/index.js",
   "keywords": [
     "homebridge-plugin"
