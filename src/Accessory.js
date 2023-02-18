@@ -43,7 +43,7 @@ exports = module.exports = function (api, characteristics, services) {
             ampere: 0,
           };
           const powerMeterService = new services.PowerMeter(this.name);
-          services.push(powerMeterService);
+          this.services.push(powerMeterService);
           historyService = this._createHistoryService(
             "energy",
             config["history"]["storage"],
