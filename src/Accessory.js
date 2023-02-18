@@ -13,12 +13,13 @@ exports = module.exports = function (api, characteristics, services) {
     ) {
       this.log = log;
       this.name = config.name;
+      this.serial = config.serial_number;
 
       // Set up information service
       const informationService = new api.hap.Service.AccessoryInformation()
-        .setCharacteristic(api.hap.Characteristic.Manufacturer, config["info"]["manufacturer"])
-        .setCharacteristic(api.hap.Characteristic.Model, config["info"]["model"])
-        .setCharacteristic(api.hap.Characteristic.SerialNumber, config["info"]["serialNumber"])
+        .setCharacteristic(api.hap.Characteristic.Manufacturer, config["manufacturer"])
+        .setCharacteristic(api.hap.Characteristic.Model, config["model"])
+        .setCharacteristic(api.hap.Characteristic.SerialNumber, config["serial_number"])
         .setCharacteristic(api.hap.Characteristic.FirmwareRevision, process.env.npm_package_version);
       this.services.push(informationService);
 
@@ -31,6 +32,8 @@ exports = module.exports = function (api, characteristics, services) {
         this.log.debug(`${topic}: ${message}`);
       })
 
+      let historyService;
+
       switch (config.type) {
         case "energy":
           this.values = {
@@ -40,7 +43,15 @@ exports = module.exports = function (api, characteristics, services) {
             ampere: 0,
           };
           const powerMeterService = new services.PowerMeter(this.name);
-          this.services.push(powerMeterService);
+          services.push(powerMeterService);
+          historyService = this._createHistoryService(
+            "energy",
+            config["history"]["storage"],
+            config["history"]["filename"],
+            config["history"]["filepath"],
+          );
+          this.services.push(historyService);
+
           powerMeterService.getCharacteristic(characteristics.Consumption).onGet(() => this.values.consumption);
           powerMeterService.getCharacteristic(characteristics.TotalConsumption).onGet(() => this.values.totalConsumption);
           powerMeterService.getCharacteristic(characteristics.Voltage).onGet(() => this.values.voltage);
@@ -48,6 +59,7 @@ exports = module.exports = function (api, characteristics, services) {
           this.mqtt.on(mqtt.KeyConsumption, (consumption) => {
             this.values.consumption = consumption;
             powerMeterService.setCharacteristic(characteristics.Consumption, consumption);
+            historyService.addEntry({time: Math.round(new Date().valueOf() / 1000), power: consumption});
           });
           this.mqtt.on(mqtt.KeyTotalConsumption, (totalConsumption) => {
             this.values.totalConsumption = totalConsumption;
@@ -61,19 +73,6 @@ exports = module.exports = function (api, characteristics, services) {
             this.values.voltage = voltage;
             powerMeterService.setCharacteristic(characteristics.Voltage, voltage);
           });
-
-          if (config["history"]["activate"] === true) {
-            const historyService = this._createHistoryService(
-              "energy",
-              config["history"]["storage"],
-              config["history"]["filename"],
-              config["history"]["filepath"],
-            );
-            this.mqtt.on(mqtt.KeyConsumption, (consumption) => {
-              historyService.addEntry({time: Math.round(new Date().valueOf() / 1000), power: consumption});
-            });
-            this.services.push(historyService);
-          }
           break;
         case "climate":
           this.values = {
@@ -87,40 +86,32 @@ exports = module.exports = function (api, characteristics, services) {
           this.services.push(humidityService);
           const airPressureService = new services.AirPressure(this.name);
           this.services.push(airPressureService);
+          historyService = this._createHistoryService(
+            "weather",
+            config["history"]["storage"],
+            config["history"]["filename"],
+            config["history"]["filepath"],
+          );
+          this.services.push(historyService);
+
           temperatureService.getCharacteristic(api.hap.Characteristic.CurrentTemperature).onGet(() => this.values.temperature);
           humidityService.getCharacteristic(api.hap.Characteristic.CurrentRelativeHumidity).onGet(() => this.values.humidity);
           airPressureService.getCharacteristic(characteristics.AirPressure).onGet(() => this.values.airPressure);
           this.mqtt.on(mqtt.KeyTemperature, (temperature) => {
             this.values.temperature = temperature;
             temperatureService.setCharacteristic(api.hap.Characteristic.CurrentTemperature, temperature);
+            historyService.addEntry({time: Math.round(new Date().valueOf() / 1000), temp: temperature});
           });
           this.mqtt.on(mqtt.KeyHumidity, (humidity) => {
             this.values.humidity = humidity;
             humidityService.setCharacteristic(api.hap.Characteristic.CurrentRelativeHumidity, humidity);
+            historyService.addEntry({time: Math.round(new Date().valueOf() / 1000), humidity: humidity});
           });
           this.mqtt.on(mqtt.KeyAirPressure, (airPressure) => {
             this.values.airPressure = airPressure;
             airPressureService.setCharacteristic(characteristics.AirPressure, airPressure);
+            historyService.addEntry({time: Math.round(new Date().valueOf() / 1000), pressure: airPressure});
           });
-
-          if (config["history"]["activate"] === true) {
-            const historyService = this._createHistoryService(
-              "weather",
-              config["history"]["storage"],
-              config["history"]["filename"],
-              config["history"]["filepath"],
-            );
-            this.mqtt.on(mqtt.KeyTemperature, (temperature) => {
-              historyService.addEntry({time: Math.round(new Date().valueOf() / 1000), temp: temperature});
-            });
-            this.mqtt.on(mqtt.KeyHumidity, (humidity) => {
-              historyService.addEntry({time: Math.round(new Date().valueOf() / 1000), humidity: humidity});
-            });
-            this.mqtt.on(mqtt.KeyAirPressure, (airPressure) => {
-              historyService.addEntry({time: Math.round(new Date().valueOf() / 1000), pressure: airPressure});
-            });
-            this.services.push(historyService);
-          }
           break;
         case "contact":
           this.values = {
@@ -130,7 +121,7 @@ exports = module.exports = function (api, characteristics, services) {
             contact: 0,
           };
           // Contact only works with fakegato due to persisted data
-          const historyService = this._createHistoryService(
+          historyService = this._createHistoryService(
             "door",
             config["history"]["storage"],
             config["history"]["filename"],
@@ -198,7 +189,7 @@ exports = module.exports = function (api, characteristics, services) {
     _createHistoryService(type, storage, filename, filepath) {
       // Filename cannot be empty
       if (filename === "") {
-        filename = this.name;
+        filename = this.serial;
       }
       filename = filename.substring(filename.length - 5) === ".json" ? filename : filename + ".json";
       return new FakeGatoHistoryService(type, this, {

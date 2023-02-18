@@ -18,20 +18,36 @@ const DefaultKeys = {
   consumption: "power",
   totalConsumption: "energy",
   voltage: "voltage",
-  ampere: "ampere",
+  ampere: "current",
   temperature: "temperature",
   humidity: "humidity",
   pressure: "pressure",
   contact: "contact",
 };
 
+function defaultKeys(keys) {
+  if (keys === undefined) {
+    return DefaultKeys;
+  }
+  return {
+    consumption: keys.consumption ? keys.consumption : DefaultKeys.consumption,
+    totalConsumption: keys.totalConsumption ? keys.totalConsumption : DefaultKeys.totalConsumption,
+    voltage: keys.voltage ? keys.voltage : DefaultKeys.voltage,
+    ampere: keys.ampere ? keys.ampere : DefaultKeys.ampere,
+    temperature: keys.temperature ? keys.temperature : DefaultKeys.temperature,
+    humidity: keys.humidity ? keys.humidity : DefaultKeys.humidity,
+    pressure: keys.pressure ? keys.pressure : DefaultKeys.pressure,
+    contact: keys.contact ? keys.contact : DefaultKeys.contact,
+  }
+}
+
 class MqttClient extends EventEmitter {
   constructor(config) {
     super();
 
-    this.keys = config.keys ? config.keys : DefaultKeys;
+    this.keys = defaultKeys(config.keys);
 
-    this.mqtt = mqtt.connect(config.mqtt.url, {
+    this.mqtt = mqtt.connect(config.mqtt_url, {
       keepalive: 10,
       clientId: "mqttjs_".concat(Math.random().toString(16).substring(2, 8)),
       protocolId: "MQTT",
@@ -39,14 +55,14 @@ class MqttClient extends EventEmitter {
       clean: true,
       reconnectPeriod: 1000,
       connectTimeout: 30_000,
-      username: config.mqtt.username,
-      password: config.mqtt.password,
+      username: config.mqtt_username,
+      password: config.mqtt_password,
       rejectUnauthorized: false,
     })
 
     this.mqtt.on("connect", () => {
       this.emit(KeyConnect, null);
-      this.mqtt.subscribe(config.mqtt.topic);
+      this.mqtt.subscribe(config.mqtt_topic);
     })
 
     this.mqtt.on("message", (topic, payload) => {
