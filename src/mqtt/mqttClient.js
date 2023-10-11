@@ -1,17 +1,17 @@
-const mqtt = require("mqtt")
-const EventEmitter = require("events")
+const mqtt = require("mqtt");
+const EventEmitter = require("events");
 
 const
-  KeyConnect = "connect",
-  KeyMessage = "message",
-  KeyConsumption = "consumption",
-  KeyTotalConsumption = "totalConsumption",
-  KeyVoltage = "voltage",
-  KeyAmpere = "ampere",
-  KeyTemperature = "temperature",
-  KeyHumidity = "humidity",
-  KeyAirPressure = "pressure",
-  KeyContact = "contact"
+    KeyConnect = "connect",
+    KeyMessage = "message",
+    KeyConsumption = "consumption",
+    KeyTotalConsumption = "totalConsumption",
+    KeyVoltage = "voltage",
+    KeyAmpere = "ampere",
+    KeyTemperature = "temperature",
+    KeyHumidity = "humidity",
+    KeyAirPressure = "pressure",
+    KeyContact = "contact"
 ;
 
 const DefaultKeys = {
@@ -38,7 +38,7 @@ function defaultKeys(keys) {
     humidity: keys.humidity ? keys.humidity : DefaultKeys.humidity,
     pressure: keys.pressure ? keys.pressure : DefaultKeys.pressure,
     contact: keys.contact ? keys.contact : DefaultKeys.contact,
-  }
+  };
 }
 
 class MqttClient extends EventEmitter {
@@ -58,12 +58,12 @@ class MqttClient extends EventEmitter {
       username: config.mqtt_username,
       password: config.mqtt_password,
       rejectUnauthorized: false,
-    })
+    });
 
     this.mqtt.on("connect", () => {
       this.emit(KeyConnect, null);
       this.mqtt.subscribe(config.mqtt_topic);
-    })
+    });
 
     this.mqtt.on("message", (topic, payload) => {
       this.emit(KeyMessage, topic, payload.toString());
@@ -106,7 +106,7 @@ class MqttClient extends EventEmitter {
 
 
       if (mqttData.hasOwnProperty(this.keys[KeyContact])) {
-        const contactBool = mqttData[this.keys[KeyContact]]
+        const contactBool = mqttData[this.keys[KeyContact]];
         this.emit(KeyContact, contactBool ? 1 : 0);
       }
     });

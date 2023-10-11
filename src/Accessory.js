@@ -1,4 +1,4 @@
-const mqtt = require("./mqtt/mqttClient")
+const mqtt = require("./mqtt/mqttClient");
 
 exports = module.exports = function (api, characteristics, services) {
   const FakeGatoHistoryService = require("fakegato-history")(api);
@@ -8,8 +8,8 @@ exports = module.exports = function (api, characteristics, services) {
     values = {};
 
     constructor(
-      log,
-      config,
+        log,
+        config,
     ) {
       this.log = log;
       this.name = config.name;
@@ -17,20 +17,20 @@ exports = module.exports = function (api, characteristics, services) {
 
       // Set up information service
       const informationService = new api.hap.Service.AccessoryInformation()
-        .setCharacteristic(api.hap.Characteristic.Manufacturer, config["manufacturer"])
-        .setCharacteristic(api.hap.Characteristic.Model, config["model"])
-        .setCharacteristic(api.hap.Characteristic.SerialNumber, config["serial_number"])
-        .setCharacteristic(api.hap.Characteristic.FirmwareRevision, process.env.npm_package_version);
+          .setCharacteristic(api.hap.Characteristic.Manufacturer, config["manufacturer"])
+          .setCharacteristic(api.hap.Characteristic.Model, config["model"])
+          .setCharacteristic(api.hap.Characteristic.SerialNumber, config["serial_number"])
+          .setCharacteristic(api.hap.Characteristic.FirmwareRevision, process.env.npm_package_version);
       this.services.push(informationService);
 
       // Connect to MQTT
       this.mqtt = new mqtt.MqttClient(config);
       this.mqtt.on(mqtt.KeyConnect, () => {
         this.log.debug("Connected to MQTT server.");
-      })
+      });
       this.mqtt.on(mqtt.KeyMessage, (topic, message) => {
         this.log.debug(`${topic}: ${message}`);
-      })
+      });
 
       let historyService;
 
@@ -45,10 +45,10 @@ exports = module.exports = function (api, characteristics, services) {
           const powerMeterService = new services.PowerMeter(this.name);
           this.services.push(powerMeterService);
           historyService = this._createHistoryService(
-            "energy",
-            config["history"]["storage"],
-            config["history"]["filename"],
-            config["history"]["filepath"],
+              "energy",
+              config["history"]["storage"],
+              config["history"]["filename"],
+              config["history"]["filepath"],
           );
           this.services.push(historyService);
 
@@ -87,10 +87,10 @@ exports = module.exports = function (api, characteristics, services) {
           const airPressureService = new services.AirPressure(this.name);
           this.services.push(airPressureService);
           historyService = this._createHistoryService(
-            "weather",
-            config["history"]["storage"],
-            config["history"]["filename"],
-            config["history"]["filepath"],
+              "weather",
+              config["history"]["storage"],
+              config["history"]["filename"],
+              config["history"]["filepath"],
           );
           this.services.push(historyService);
 
@@ -122,10 +122,10 @@ exports = module.exports = function (api, characteristics, services) {
           };
           // Contact only works with fakegato due to persisted data
           historyService = this._createHistoryService(
-            "door",
-            config["history"]["storage"],
-            config["history"]["filename"],
-            config["history"]["filepath"],
+              "door",
+              config["history"]["storage"],
+              config["history"]["filename"],
+              config["history"]["filepath"],
           );
           this.services.push(historyService);
           historyService.load(function (err, loaded) {
@@ -145,16 +145,16 @@ exports = module.exports = function (api, characteristics, services) {
           this.services.push(contactSensorService);
           contactSensorService.getCharacteristic(api.hap.Characteristic.ContactSensorState).onGet(() => this.values.contact);
           contactSensorService.addCharacteristic(characteristics.TimesOpened)
-            .onGet(() => this.values.timesOpened);
+              .onGet(() => this.values.timesOpened);
           contactSensorService.addCharacteristic(characteristics.ResetTotal)
-            .onGet(() => this.values.lastReset)
-            .onSet((lastReset) => {
-              this.values.lastReset = lastReset;
-              this.values.timesOpened = 0;
-              historyService.setExtraPersistedData(this.values);
-            });
+              .onGet(() => this.values.lastReset)
+              .onSet((lastReset) => {
+                this.values.lastReset = lastReset;
+                this.values.timesOpened = 0;
+                historyService.setExtraPersistedData(this.values);
+              });
           contactSensorService.addCharacteristic(characteristics.LastActivation)
-            .onGet(() => this.values.lastOpening);
+              .onGet(() => this.values.lastOpening);
           contactSensorService.addCharacteristic(characteristics.Char118);
           contactSensorService.addCharacteristic(characteristics.Char119);
 
@@ -167,7 +167,7 @@ exports = module.exports = function (api, characteristics, services) {
               // Open
               if (this.values.contact === api.hap.Characteristic.ContactSensorState.CONTACT_NOT_DETECTED) {
                 // Ignore re-published events to not increase timesOpened
-                return
+                return;
               }
               this.values.contact = api.hap.Characteristic.ContactSensorState.CONTACT_NOT_DETECTED;
               this.values.timesOpened++;
@@ -179,23 +179,23 @@ exports = module.exports = function (api, characteristics, services) {
               status: contact ? 1 : 0,
             });
             contactSensorService.setCharacteristic(api.hap.Characteristic.ContactSensorState,
-              contact ? api.hap.Characteristic.ContactSensorState.CONTACT_DETECTED : api.hap.Characteristic.ContactSensorState.CONTACT_NOT_DETECTED);
+                contact ? api.hap.Characteristic.ContactSensorState.CONTACT_DETECTED : api.hap.Characteristic.ContactSensorState.CONTACT_NOT_DETECTED);
           });
           break;
       }
-      this.log.info("Setup done.")
+      this.log.info("Setup done.");
     }
 
     _createHistoryService(type, storage, filename, filepath) {
       // Filename cannot be empty
-      if (filename === "") {
+      if (!filename || filename === "") {
         filename = this.serial;
       }
       filename = filename.substring(filename.length - 5) === ".json" ? filename : filename + ".json";
       return new FakeGatoHistoryService(type, this, {
         storage: storage,
         filename: filename,
-        path: filepath
+        path: filepath,
       });
     }
 
@@ -207,5 +207,5 @@ exports = module.exports = function (api, characteristics, services) {
       this.log.info("Identify requested!");
       callback();
     }
-  }
-}
+  };
+};
