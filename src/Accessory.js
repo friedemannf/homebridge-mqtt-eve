@@ -182,6 +182,62 @@ exports = module.exports = function (api, characteristics, services) {
                 contact ? api.hap.Characteristic.ContactSensorState.CONTACT_DETECTED : api.hap.Characteristic.ContactSensorState.CONTACT_NOT_DETECTED);
           });
           break;
+        case "thermo":
+          this.values = {
+            temperature: 0,
+            setTemperature: 10,
+            valvePosition: 0,
+          };
+          const thermostatService = new api.hap.Service.Thermostat(this.name);
+          this.services.push(thermostatService);
+          historyService = this._createHistoryService(
+              "thermo",
+              config["history"]["storage"],
+              config["history"]["filename"],
+              config["history"]["filepath"],
+          );
+          this.services.push(historyService);
+
+          thermostatService.getCharacteristic(api.hap.Characteristic.CurrentTemperature).onGet(() => this.values.temperature);
+          thermostatService.getCharacteristic(api.hap.Characteristic.TargetTemperature).onGet(() => this.values.setTemperature);
+          thermostatService.addCharacteristic(characteristics.ValvePosition).onGet(() => this.values.valvePosition);
+          thermostatService.addCharacteristic(characteristics.ProgramData).onGet(() => "");
+          thermostatService.addCharacteristic(characteristics.ProgramCommand).onSet((command) => this.log.debug("ProgramCommand", command));
+
+          const addEntry = function () {
+            this.log.debug("addEntry", this.values);
+            // Check if all values are populated
+            if (this.values.temperature === 0 || this.values.setTemperature === 0 || this.values.valvePosition === 0) {
+              return;
+            }
+            historyService.addEntry({
+              time: Math.round(new Date().valueOf() / 1000),
+              currentTemp: this.values.temperature,
+              setTemp: this.values.setTemperature,
+              valvePosition: this.values.valvePosition,
+            });
+            this.log.debug("addEntry done");
+          }.bind(this);
+
+          const ticker = new AdjustingInterval(addEntry, 600_000);
+          ticker.start();
+
+          this.mqtt.on(mqtt.KeyTemperature, (temperature) => {
+            this.values.temperature = temperature / 100;
+            this.log.debug("temperature", this.values.temperature);
+            thermostatService.setCharacteristic(api.hap.Characteristic.CurrentTemperature, this.values.temperature);
+          });
+          this.mqtt.on(mqtt.KeySetTemperature, (setTemperature) => {
+            this.values.setTemperature = setTemperature;
+            this.log.debug("setTemperature", this.values.setTemperature);
+            thermostatService.setCharacteristic(api.hap.Characteristic.TargetTemperature, this.values.setTemperature);
+          });
+          this.mqtt.on(mqtt.KeyValvePosition, (valvePosition) => {
+            this.values.valvePosition = valvePosition;
+            this.log.debug("valvePosition", this.values.valvePosition);
+            thermostatService.setCharacteristic(characteristics.ValvePosition, this.values.valvePosition);
+          });
+          break;
       }
       this.log.info("Setup done.");
     }
@@ -209,3 +265,38 @@ exports = module.exports = function (api, characteristics, services) {
     }
   };
 };
+
+/**
+ * Self-adjusting interval to account for drifting
+ *
+ * @param {function} workFunc  Callback containing the work to be done
+ *                             for each interval
+ * @param {int}      interval  Interval speed (in milliseconds)
+ * @param {function} errorFunc (Optional) Callback to run if the drift
+ *                             exceeds interval
+ */
+function AdjustingInterval(workFunc, interval, errorFunc = undefined) {
+  var that = this;
+  var expected, timeout;
+  this.interval = interval;
+
+  this.start = function () {
+    expected = Date.now() + this.interval;
+    timeout = setTimeout(step, this.interval);
+  };
+
+  this.stop = function () {
+    clearTimeout(timeout);
+  };
+
+  function step() {
+    var drift = Date.now() - expected;
+    if (drift > that.interval) {
+      // You could have some default stuff here too...
+      if (errorFunc) errorFunc();
+    }
+    workFunc();
+    expected += that.interval;
+    timeout = setTimeout(step, Math.max(0, that.interval - drift));
+  }
+}

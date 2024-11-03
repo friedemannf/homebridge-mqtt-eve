@@ -12,6 +12,8 @@ const CustomCharacteristic = {
   TimesOpened: undefined,
   Char118: undefined,
   Char119: undefined,
+  // Thermo
+  ValvePosition: undefined,
 };
 let CustomServices = {
   PowerMeter: undefined,
@@ -147,6 +149,38 @@ module.exports = function (api) {
       });
     };
   };
+
+  // Thermo
+  CustomCharacteristic.ValvePosition = class extends Characteristic {
+    constructor() {
+      super();
+      Characteristic.call(this, "ValvePosition", "E863F12E-079E-48FF-8F27-9C2605A29F52");
+      this.setProps({
+        format: api.hap.Formats.UINT8,
+        perms: [api.hap.Perms.NOTIFY, api.hap.Perms.PAIRED_READ],
+      });
+    };
+  }
+  CustomCharacteristic.ProgramCommand = class extends Characteristic {
+    constructor() {
+      super();
+      Characteristic.call(this, "ProgramCommand", "E863F12C-079E-48FF-8F27-9C2605A29F52");
+      this.setProps({
+        format: api.hap.Formats.DATA,
+        perms: [api.hap.Perms.NOTIFY, api.hap.Perms.PAIRED_WRITE],
+      });
+    }
+  }
+  CustomCharacteristic.ProgramData = class extends Characteristic {
+    constructor() {
+      super();
+      Characteristic.call(this, "ProgramData", "E863F12F-079E-48FF-8F27-9C2605A29F52");
+      this.setProps({
+        format: api.hap.Formats.DATA,
+        perms: [api.hap.Perms.NOTIFY, api.hap.Perms.PAIRED_READ],
+      });
+    }
+  }
 
   // Custom Services
 

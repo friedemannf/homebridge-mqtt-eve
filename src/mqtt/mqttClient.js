@@ -11,7 +11,9 @@ const
     KeyTemperature = "temperature",
     KeyHumidity = "humidity",
     KeyAirPressure = "pressure",
-    KeyContact = "contact"
+    KeyContact = "contact",
+    KeyValvePosition = "valvePosition",
+    KeySetTemperature = "setTemperature"
 ;
 
 const DefaultKeys = {
@@ -23,6 +25,8 @@ const DefaultKeys = {
   humidity: "humidity",
   pressure: "pressure",
   contact: "contact",
+  valvePosition: "pi_heating_demand",
+  setTemperature: "occupied_heating_setpoint",
 };
 
 function defaultKeys(keys) {
@@ -38,6 +42,8 @@ function defaultKeys(keys) {
     humidity: keys.humidity ? keys.humidity : DefaultKeys.humidity,
     pressure: keys.pressure ? keys.pressure : DefaultKeys.pressure,
     contact: keys.contact ? keys.contact : DefaultKeys.contact,
+    valvePosition: keys.valvePosition ? keys.valvePosition : DefaultKeys.valvePosition,
+    setTemperature: keys.setTemperature ? keys.setTemperature : DefaultKeys.setTemperature,
   };
 }
 
@@ -90,7 +96,6 @@ class MqttClient extends EventEmitter {
         this.emit(KeyAmpere, ampere);
       }
 
-
       if (mqttData.hasOwnProperty(this.keys[KeyTemperature])) {
         const temperature = parseFloat(mqttData[this.keys[KeyTemperature]]);
         this.emit(KeyTemperature, temperature);
@@ -104,6 +109,14 @@ class MqttClient extends EventEmitter {
         this.emit(KeyAirPressure, airPressure);
       }
 
+      if (mqttData.hasOwnProperty(this.keys[KeyValvePosition])) {
+        const valvePosition = parseFloat(mqttData[this.keys[KeyValvePosition]]);
+        this.emit(KeyValvePosition, valvePosition);
+      }
+      if (mqttData.hasOwnProperty(this.keys[KeySetTemperature])) {
+        const setTemperature = parseFloat(mqttData[this.keys[KeySetTemperature]]);
+        this.emit(KeySetTemperature, setTemperature);
+      }
 
       if (mqttData.hasOwnProperty(this.keys[KeyContact])) {
         const contactBool = mqttData[this.keys[KeyContact]];
@@ -125,4 +138,6 @@ module.exports = {
   KeyHumidity,
   KeyAirPressure,
   KeyContact,
+  KeyValvePosition,
+  KeySetTemperature,
 };

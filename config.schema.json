@@ -34,6 +34,12 @@
             "enum": [
               "climate"
             ]
+          },
+          {
+            "title": "Thermostat",
+            "enum": [
+              "thermo"
+            ]
           }
         ]
       },
@@ -145,7 +151,7 @@
             "type": "string",
             "placeholder": "temperature",
             "condition": {
-              "functionBody": "return (model.type === 'climate')"
+              "functionBody": "return (model.type === 'climate') || (model.type === 'thermo')"
             }
           },
           "humidity": {
@@ -167,6 +173,20 @@
             "placeholder": "contact",
             "condition": {
               "functionBody": "return (model.type === 'contact')"
+            }
+          },
+          "targetTemperature": {
+            "type": "string",
+            "placeholder": "targetTemperature",
+            "condition": {
+              "functionBody": "return (model.type === 'thermo')"
+            }
+          },
+          "valvePosition": {
+            "type": "string",
+            "placeholder": "valvePosition",
+            "condition": {
+              "functionBody": "return (model.type === 'thermo')"
             }
           }
         }
@@ -261,8 +281,10 @@
         "keys.temperature",
         "keys.humidity",
         "keys.pressure",
-        "keys.contact"
+        "keys.contact",
+        "keys.targetTemperature",
+        "keys.valvePosition"
       ]
     }
   ]
-}  
+}
