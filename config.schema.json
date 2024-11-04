@@ -112,6 +112,12 @@
             "condition": {
               "functionBody": "return (model.history.storage === 'fs')"
             }
+          },
+          "size": {
+            "title": "History Size",
+            "type": "integer",
+            "default": 4032,
+            "description": "The number of data points to keep in local history. Once this limit has been reached, the plugin will start overwriting the oldest first. The lower the number, the more often the Eve app will need to be opened to make sure to not lose any history."
           }
         }
       },
@@ -263,7 +269,8 @@
           "flex-flow": "row wrap",
           "items": [
             "history.filepath",
-            "history.filename"
+            "history.filename",
+            "history.size"
           ]
         }
       ]

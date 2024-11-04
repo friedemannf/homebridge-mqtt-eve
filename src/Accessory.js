@@ -13,6 +13,7 @@ exports = module.exports = function (api, characteristics, services) {
     ) {
       this.log = log;
       this.name = config.name;
+      this.displayName = config.name;
       this.serial = config.serial_number;
 
       // Set up information service
@@ -49,6 +50,7 @@ exports = module.exports = function (api, characteristics, services) {
               config["history"]["storage"],
               config["history"]["filename"],
               config["history"]["filepath"],
+              config["history"]["size"],
           );
           this.services.push(historyService);
 
@@ -91,6 +93,7 @@ exports = module.exports = function (api, characteristics, services) {
               config["history"]["storage"],
               config["history"]["filename"],
               config["history"]["filepath"],
+              config["history"]["size"],
           );
           this.services.push(historyService);
 
@@ -126,6 +129,7 @@ exports = module.exports = function (api, characteristics, services) {
               config["history"]["storage"],
               config["history"]["filename"],
               config["history"]["filepath"],
+              config["history"]["size"],
           );
           this.services.push(historyService);
           historyService.load(function (err, loaded) {
@@ -195,6 +199,7 @@ exports = module.exports = function (api, characteristics, services) {
               config["history"]["storage"],
               config["history"]["filename"],
               config["history"]["filepath"],
+              config["history"]["size"],
           );
           this.services.push(historyService);
 
@@ -242,16 +247,22 @@ exports = module.exports = function (api, characteristics, services) {
       this.log.info("Setup done.");
     }
 
-    _createHistoryService(type, storage, filename, filepath) {
+    _createHistoryService(type, storage, filename, filepath, size) {
       // Filename cannot be empty
       if (!filename || filename === "") {
         filename = this.serial;
       }
+      // Strip .json prefix if specified
       filename = filename.substring(filename.length - 5) === ".json" ? filename : filename + ".json";
+      // Default to a history size of 4032 if unspecified
+      if (!size || size === 0) {
+        size = 4032;
+      }
       return new FakeGatoHistoryService(type, this, {
         storage: storage,
         filename: filename,
         path: filepath,
+        size: size,
       });
     }
 
