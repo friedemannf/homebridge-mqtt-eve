@@ -210,7 +210,6 @@ exports = module.exports = function (api, characteristics, services) {
           thermostatService.addCharacteristic(characteristics.ProgramCommand).onSet((command) => this.log.debug("ProgramCommand", command));
 
           const addEntry = function () {
-            this.log.debug("addEntry", this.values);
             // Check if all values are populated
             if (this.values.temperature === 0 || this.values.setTemperature === 0 || this.values.valvePosition === 0) {
               return;
@@ -221,7 +220,6 @@ exports = module.exports = function (api, characteristics, services) {
               setTemp: this.values.setTemperature,
               valvePosition: this.values.valvePosition,
             });
-            this.log.debug("addEntry done");
           }.bind(this);
 
           const ticker = new AdjustingInterval(addEntry, 600_000);
@@ -229,17 +227,14 @@ exports = module.exports = function (api, characteristics, services) {
 
           this.mqtt.on(mqtt.KeyTemperature, (temperature) => {
             this.values.temperature = temperature / 100;
-            this.log.debug("temperature", this.values.temperature);
             thermostatService.setCharacteristic(api.hap.Characteristic.CurrentTemperature, this.values.temperature);
           });
           this.mqtt.on(mqtt.KeySetTemperature, (setTemperature) => {
             this.values.setTemperature = setTemperature;
-            this.log.debug("setTemperature", this.values.setTemperature);
             thermostatService.setCharacteristic(api.hap.Characteristic.TargetTemperature, this.values.setTemperature);
           });
           this.mqtt.on(mqtt.KeyValvePosition, (valvePosition) => {
             this.values.valvePosition = valvePosition;
-            this.log.debug("valvePosition", this.values.valvePosition);
             thermostatService.setCharacteristic(characteristics.ValvePosition, this.values.valvePosition);
           });
           break;
