@@ -183,14 +183,14 @@
           },
           "targetTemperature": {
             "type": "string",
-            "placeholder": "targetTemperature",
+            "placeholder": "occupied_heating_setpoint",
             "condition": {
               "functionBody": "return (model.type === 'thermo')"
             }
           },
           "valvePosition": {
             "type": "string",
-            "placeholder": "valvePosition",
+            "placeholder": "pi_heating_demand",
             "condition": {
               "functionBody": "return (model.type === 'thermo')"
             }

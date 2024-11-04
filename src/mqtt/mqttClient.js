@@ -79,46 +79,46 @@ class MqttClient extends EventEmitter {
         return;
       }
 
-      if (mqttData.hasOwnProperty(this.keys[KeyConsumption])) {
+      if (this.keys[KeyConsumption] !== "-" && mqttData.hasOwnProperty(this.keys[KeyConsumption])) {
         const consumption = parseFloat(mqttData[this.keys[KeyConsumption]]);
         this.emit(KeyConsumption, consumption);
       }
-      if (mqttData.hasOwnProperty(this.keys[KeyTotalConsumption])) {
+      if (this.keys[KeyTotalConsumption] !== "-" && mqttData.hasOwnProperty(this.keys[KeyTotalConsumption])) {
         const totalConsumption = parseFloat(mqttData[this.keys[KeyTotalConsumption]]);
         this.emit(KeyTotalConsumption, totalConsumption);
       }
-      if (mqttData.hasOwnProperty(this.keys[KeyVoltage])) {
+      if (this.keys[KeyVoltage] !== "-" && mqttData.hasOwnProperty(this.keys[KeyVoltage])) {
         const voltage = parseFloat(mqttData[this.keys[KeyVoltage]]);
         this.emit(KeyVoltage, voltage);
       }
-      if (mqttData.hasOwnProperty(this.keys[KeyAmpere])) {
+      if (this.keys[KeyAmpere] !== "-" && mqttData.hasOwnProperty(this.keys[KeyAmpere])) {
         const ampere = parseFloat(mqttData[this.keys[KeyAmpere]]);
         this.emit(KeyAmpere, ampere);
       }
 
-      if (mqttData.hasOwnProperty(this.keys[KeyTemperature])) {
+      if (this.keys[KeyTemperature] !== "-" && mqttData.hasOwnProperty(this.keys[KeyTemperature])) {
         const temperature = parseFloat(mqttData[this.keys[KeyTemperature]]);
         this.emit(KeyTemperature, temperature);
       }
-      if (mqttData.hasOwnProperty(this.keys[KeyHumidity])) {
+      if (this.keys[KeyHumidity] !== "-" && mqttData.hasOwnProperty(this.keys[KeyHumidity])) {
         const humidity = parseFloat(mqttData[this.keys[KeyHumidity]]);
         this.emit(KeyHumidity, humidity);
       }
-      if (mqttData.hasOwnProperty(this.keys[KeyAirPressure])) {
+      if (this.keys[KeyAirPressure] !== "-" && mqttData.hasOwnProperty(this.keys[KeyAirPressure])) {
         const airPressure = parseFloat(mqttData[this.keys[KeyAirPressure]]);
         this.emit(KeyAirPressure, airPressure);
       }
 
-      if (mqttData.hasOwnProperty(this.keys[KeyValvePosition])) {
+      if (this.keys[KeyValvePosition] !== "-" && mqttData.hasOwnProperty(this.keys[KeyValvePosition])) {
         const valvePosition = parseFloat(mqttData[this.keys[KeyValvePosition]]);
         this.emit(KeyValvePosition, valvePosition);
       }
-      if (mqttData.hasOwnProperty(this.keys[KeySetTemperature])) {
+      if (this.keys[KeySetTemperature] !== "-" && mqttData.hasOwnProperty(this.keys[KeySetTemperature])) {
         const setTemperature = parseFloat(mqttData[this.keys[KeySetTemperature]]);
         this.emit(KeySetTemperature, setTemperature);
       }
 
-      if (mqttData.hasOwnProperty(this.keys[KeyContact])) {
+      if (this.keys[KeyContact] !== "-" && mqttData.hasOwnProperty(this.keys[KeyContact])) {
         const contactBool = mqttData[this.keys[KeyContact]];
         this.emit(KeyContact, contactBool ? 1 : 0);
       }

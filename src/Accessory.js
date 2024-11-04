@@ -83,11 +83,17 @@ exports = module.exports = function (api, characteristics, services) {
             airPressure: 600,
           };
           const temperatureService = new api.hap.Service.TemperatureSensor(this.name);
-          this.services.push(temperatureService);
+          if (config.keys["temperature"] !== "-") {
+            this.services.push(temperatureService);
+          }
           const humidityService = new api.hap.Service.HumiditySensor(this.name);
-          this.services.push(humidityService);
+          if (config.keys["humidity"] !== "-") {
+            this.services.push(humidityService);
+          }
           const airPressureService = new services.AirPressure(this.name);
-          this.services.push(airPressureService);
+          if (config.keys["pressure"] !== "-") {
+            this.services.push(airPressureService);
+          }
           historyService = this._createHistoryService(
               "weather",
               config["history"]["storage"],
